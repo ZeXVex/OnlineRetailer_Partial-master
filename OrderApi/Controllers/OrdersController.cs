@@ -1,32 +1,42 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Net.Http;
+using System.Text;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 using OrderApi.Data;
+using OrderApi.Infrastructure;
 using OrderApi.Models;
 using RestSharp;
+using SharedProject;
 
 namespace OrderApi.Controllers
 {
-    [ApiController]
-    [Route("[controller]")]
-    public class OrdersController : ControllerBase
+    [Route("api/Orders")]
+    public class OrdersController : Controller
     {
-        private readonly IRepository<Order> repository;
+        private readonly IRepository<Models.Order> repository;
+        IServiceGateway<Product> productServiceGateway;
+        IMessagePublisher messagePublisher;
 
-        public OrdersController(IRepository<Order> repos)
+        public OrdersController(IRepository<Models.Order> repoes, IServiceGateway<Product> gateway, IMessagePublisher publisher)
         {
-            repository = repos;
+            repository = repoes;
+            productServiceGateway = gateway;
+            messagePublisher = publisher;
         }
 
-        // GET: orders
+        // GET: api/orders
         [HttpGet]
-        public IEnumerable<Order> Get()
+        public IEnumerable<Models.Order> Get()
         {
             return repository.GetAll();
         }
 
-        // GET orders/5
-        [HttpGet("{id}", Name = "GetOrder")]
+        // GET api/products/5
+        [HttpGet]
+        [Route("getById/{id}")]
         public IActionResult Get(int id)
         {
             var item = repository.Get(id);
@@ -37,43 +47,176 @@ namespace OrderApi.Controllers
             return new ObjectResult(item);
         }
 
-        // POST orders
+        [HttpGet]
+        [Route("getByCustomerId/{customerId}")]
+        public IEnumerable<Models.Order> GetOrderById(int customerId)
+        {
+            return repository.GetAllByCustomer(customerId);
+        }
+
+        [HttpGet]
+        [Route("getByProductId/{productId}")]
+        public IActionResult GetProductById(int productId)
+        {
+            var ord = new SharedProject.Order();
+            var orderline = new SharedProject.Order.OrderLine { ProductId = 1, OrderId = 1, ID = 1, Quantity = 1 };
+
+            ord.OrderLines = new SharedProject.Order.OrderLine[] { orderline };
+            if (ProductItemsAvailable(ord))
+            {
+                return StatusCode(200, "Connection worked");
+            }
+            return StatusCode(200, "Connection worked");
+        }
+
+        [HttpPut]
+        [Route("cancelOrder/{orderId}")]
+        public IActionResult CancelOrder(int orderId)
+        {
+            try
+            {
+                Models.Order selectedOrder = repository.Get(orderId);
+
+                if (selectedOrder.StatusCode == Models.Order.Status.Shipped)
+                {
+                    selectedOrder.StatusCode = Models.Order.Status.Cancelled;
+                    repository.Edit(selectedOrder);
+
+                    return Ok();
+                }
+                else
+                {
+                    return BadRequest("Order could not be cancelled");
+                }
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.InnerException != null ? ex.Message + ex.InnerException : ex.Message);
+            }
+        }
+
         [HttpPost]
-        public IActionResult Post([FromBody]Order order)
+        [Route("GetThroughBus")]
+        public IActionResult Post([FromBody]SharedProject.Order order)
         {
             if (order == null)
             {
                 return BadRequest();
             }
 
-            // Call ProductApi to get the product ordered
-            RestClient c = new RestClient();
-            // You may need to change the port number in the BaseUrl below
-            // before you can run the request.
-            c.BaseUrl = new Uri("https://localhost:5001/products/");
-            var request = new RestRequest(order.ProductId.ToString(), Method.GET);
-            var response = c.Execute<Product>(request);
-            var orderedProduct = response.Data;
-
-            if (order.Quantity <= orderedProduct.ItemsInStock - orderedProduct.ItemsReserved)
+            if (ProductItemsAvailable(order))
             {
-                // reduce the number of items in stock for the ordered product,
-                // and create a new order.
-                orderedProduct.ItemsReserved += order.Quantity;
-                var updateRequest = new RestRequest(orderedProduct.Id.ToString(), Method.PUT);
-                updateRequest.AddJsonBody(orderedProduct);
-                var updateResponse = c.Execute(updateRequest);
-
-                if (updateResponse.IsSuccessful)
+                try
                 {
-                    var newOrder = repository.Add(order);
-                    return CreatedAtRoute("GetOrder", new { id = newOrder.Id }, newOrder);
+                    // Publish OrderStatusChangedMessage. If this operation
+                    // fails, the order will not be created
+                    messagePublisher.PublishOrderStatusChangedMessage(
+                      order.customerId, order.OrderLines, "completed");
+
+                    // Create order.
+                    order.Status = SharedProject.Order.OrderStatus.completed;
+                    //var newOrder = repository.Add(order);
+                    return CreatedAtRoute("GetOrder", new { id = order.Id }, order);
+                }
+                catch
+                {
+                    return StatusCode(500, "An error happened. Try again.");
                 }
             }
-
-            // If the order could not be created, "return no content".
-            return NoContent();
+            else
+            {
+                // If there are not enough product items available.
+                return StatusCode(500, "Not enough items in stock.");
+            }
         }
 
+        // POST api/orders
+        [HttpPost]
+        public async Task<IActionResult> Post([FromBody]Models.Order order)
+        {
+            try
+            {
+                if (order == null)
+                {
+                    return BadRequest();
+                }
+
+                // Call ProductApi to get the product ordered
+                RestClient c = new RestClient();
+
+                // Get customer via http GET call.
+                // Check customer standing here
+                //c.BaseUrl = new Uri("https://localhost:44318/customers/");
+                //var requestCustomer = new RestRequest(order.CustomerID.ToString(), Method.GET);
+                //var responseCustomer = c.Execute<SharedModels.Customer>(requestCustomer);
+                //var customer = responseCustomer.Data;
+
+                // Get customer via rabbitmq request.
+                var customer = messagePublisher.RequestCustomer(order.CustomerID);
+
+                if (customer == null)
+                {
+                    return BadRequest("Customer could not be found");
+                }
+
+                if (customer.CreditStanding)
+                {
+                    var areProductsAvailable = await CheckIfProductsAreInStock(order.Products);
+                    if (areProductsAvailable == "true")
+                    {
+                        var wasSuccesfull = await addItemsToReserved(order.Products);
+                        order.StatusCode = Models.Order.Status.Shipped;
+                        repository.Add(order);
+
+                        return Ok();
+                    }
+                    else
+                    {
+                        return BadRequest("Not enough items in stock");
+                    }
+                }
+                else
+                {
+                    return BadRequest("Customer does not have resources to make a purchase");
+                }
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.InnerException != null ? ex.Message + ex.InnerException : ex.Message);
+            }
+        }
+
+        private bool ProductItemsAvailable(SharedProject.Order order)
+        {
+            foreach (var orderLine in order.OrderLines)
+            {
+                // Call product service to get the product ordered.
+                var orderedProduct = productServiceGateway.Get(orderLine.ProductId);
+                if (orderLine.Quantity > orderedProduct.ItemsInStock - orderedProduct.ItemsReserved)
+                {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        private async Task<String> CheckIfProductsAreInStock(IEnumerable<ProductDTO> listOfProducts)
+        {
+            var json = JsonConvert.SerializeObject(listOfProducts);
+            var data = new StringContent(json, Encoding.UTF8, "application/json");
+            var url = "https://localhost:44384/api/products/CheckIfInStock";
+            HttpClient client = new HttpClient();
+            var response = await client.PutAsync(url, data);
+            return response.Content.ReadAsStringAsync().Result;
+        }
+        private async Task<String> addItemsToReserved(IEnumerable<ProductDTO> listOfProducts)
+        {
+            var json = JsonConvert.SerializeObject(listOfProducts);
+            var data = new StringContent(json, Encoding.UTF8, "application/json");
+            var url = "https://localhost:44384/api/products/ReserveProducts";
+            HttpClient client = new HttpClient();
+            var response = await client.PutAsync(url, data);
+            return response.Content.ReadAsStringAsync().Result;
+        }
     }
 }

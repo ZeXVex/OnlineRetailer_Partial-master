@@ -19,9 +19,14 @@ namespace OrderApi.Data
                 return;   // DB has been seeded
             }
 
+            List<ProductDTO> products = new List<ProductDTO>
+            {
+                new ProductDTO { OrderId = 1, ProductId = 1, PriceForAll = 4, Quantity = 34}
+            };
             List<Order> orders = new List<Order>
             {
-                new Order { Date = DateTime.Today, ProductId = 1, Quantity = 2 }
+                new Order { Date = DateTime.Today, Products = products},
+                new Order {Date = DateTime.Today}
             };
 
             context.Orders.AddRange(orders);
