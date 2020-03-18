@@ -19,7 +19,7 @@ namespace ProductApi
         }
 
         string cloudAMQPConnectionString =
-            "host=hawk.rmq.cloudamqp.com;virtualHost=wdedqsoj;username=wdedqsoj;password= GV_TgSrC8n8fiBHEC_VfZ_GoOd-t0I3J";
+            "host=hawk.rmq.cloudamqp.com;virtualHost=wdedqsoj;username=wdedqsoj;password=GV_TgSrC8n8fiBHEC_VfZ_GoOd-t0I3J";
         public IConfiguration Configuration { get; }
 
         // This method gets called by the runtime. Use this method to add services to the container.
