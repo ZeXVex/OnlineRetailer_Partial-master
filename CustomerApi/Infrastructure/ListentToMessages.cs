@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Threading;
 using CustomerApi.Data;
-using SharedModels;
 using EasyNetQ;
 using Microsoft.Extensions.DependencyInjection;
-using CustomerApi.Models;
 
 namespace CustomerApi.Infrastructure
 {
@@ -26,10 +24,8 @@ namespace CustomerApi.Infrastructure
         {
             using (var bus = RabbitHutch.CreateBus(connectionString))
             {
-                //bus.Respond<CustomerRequest, ReturnedCustomer>(request => new ReturnedCustomer { customer = HandleCustomerRequest(request.Id) });
-                bus.Respond<Models.CustomerRequest, SharedModels.Customer>(request => HandleCustomerRequest(request.ID));
-                //bus.Respond<CustomerRequest, Customer>(request => new Customer { Id = 1, Name = "customer1", Email = "e1@mail.com", PhoneNumber = "1234", BillingAddress = "billingAddress1", ShippingAddress = "shippingAddress1", CreditStanding = true });
-
+               bus.Respond<Models.CustomerRequest, SharedModels.Customer>(request => HandleCustomerRequest(request.ID));
+                
                 // block the thread so that it will not exit and stop subscribing.
                 lock (this)
                 {
