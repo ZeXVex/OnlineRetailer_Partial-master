@@ -4,7 +4,7 @@ using System.Text;
 
 namespace SharedProject
 {
-    class Customer
+    public class Customer
     {
         public int ID { get; set; }
         public string Name { get; set; }

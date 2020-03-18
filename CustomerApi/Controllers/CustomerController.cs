@@ -43,7 +43,7 @@ namespace CustomerApi.Controllers
             }
 
             var newCustomer = repository.Add(customer);
-            return CreatedAtRoute("GetCustomer", new { id = newCustomer.Id }, newCustomer);
+            return CreatedAtRoute("GetCustomer", new { id = newCustomer.ID }, newCustomer);
         }
 
         [HttpPut]
