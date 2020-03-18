@@ -16,11 +16,11 @@ namespace CustomerApi
     {
         // This method gets called by the runtime. Use this method to add services to the container.
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
-        public void ConfigureServices(IConfiguration configuration)
+        public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
         }
-        public IConfiguration Configuration { get; }
+        public IConfiguration Configuration { get; set; }
 
         string cloudAMQPConnectionString =
             "host=hawk.rmq.cloudamqp.com;virtualHost=wdedqsoj;username=wdedqsoj;password= GV_TgSrC8n8fiBHEC_VfZ_GoOd-t0I3J";

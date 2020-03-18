@@ -8,8 +8,12 @@ namespace CustomerApi.Data
 {
     public class DbInitializer : IDbInitializer
     {
-        // This method will create and seed the database.
-        public void Initializer(CustomerApiContext context)
+        void IDbInitializer.Initialize(CustomerApiContext dbContext)
+        {
+            
+        }
+
+        void IDbInitializer.Initializer(CustomerApiContext context)
         {
             context.Database.EnsureDeleted();
             context.Database.EnsureCreated();
