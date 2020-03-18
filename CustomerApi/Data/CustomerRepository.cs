@@ -40,7 +40,7 @@ namespace CustomerApi.Data
 
         void IRepository<Customer>.Remove(int id)
         {
-            var order = Db.Customers.FirstOrDefault(p => p.Id == id);
+            var order = Db.Customers.FirstOrDefault(p => p.ID == id);
             Db.Customers.Remove(order);
             Db.SaveChanges();
         }

@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace SharedProject
+namespace SharedModels
 {
-    class CustomerRequest
+    public class CustomerRequest
     {
         public int ID { get; set; }
     }

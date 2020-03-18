@@ -17,6 +17,6 @@
 
 
   <ItemGroup>
-    <ProjectReference Include="..\SharedProject\SharedProject.csproj" />
+    <ProjectReference Include="..\SharedModels\SharedModels.csproj" />
   </ItemGroup>
 </Project>

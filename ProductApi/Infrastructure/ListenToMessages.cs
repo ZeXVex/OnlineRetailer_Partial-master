@@ -1,7 +1,7 @@
 ﻿using EasyNetQ;
 using Microsoft.Extensions.DependencyInjection;
 using ProductApi.Data;
-using SharedProject;
+using SharedModels;
 using System;
 using System.Collections.Generic;
 using System.Linq;

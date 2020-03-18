@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Threading;
 using CustomerApi.Data;
-using SharedProject;
+using SharedModels;
 using EasyNetQ;
 using Microsoft.Extensions.DependencyInjection;
 using CustomerApi.Models;
@@ -27,7 +27,7 @@ namespace CustomerApi.Infrastructure
             using (var bus = RabbitHutch.CreateBus(connectionString))
             {
                 //bus.Respond<CustomerRequest, ReturnedCustomer>(request => new ReturnedCustomer { customer = HandleCustomerRequest(request.Id) });
-                bus.Respond<CustomerRequest, Customer>(request => HandleCustomerRequest(request.Id));
+                bus.Respond<Models.CustomerRequest, SharedModels.Customer>(request => HandleCustomerRequest(request.ID));
                 //bus.Respond<CustomerRequest, Customer>(request => new Customer { Id = 1, Name = "customer1", Email = "e1@mail.com", PhoneNumber = "1234", BillingAddress = "billingAddress1", ShippingAddress = "shippingAddress1", CreditStanding = true });
 
                 // block the thread so that it will not exit and stop subscribing.
@@ -37,7 +37,7 @@ namespace CustomerApi.Infrastructure
                 }
             }
         }
-        private Customer HandleCustomerRequest(int id)
+        private SharedModels.Customer HandleCustomerRequest(int id)
         {
             // A service scope is created to get an instance of the product repository.
             // When the service scope is disposed, the product repository instance will
@@ -45,7 +45,7 @@ namespace CustomerApi.Infrastructure
             using (var scope = provider.CreateScope())
             {
                 var services = scope.ServiceProvider;
-                var customerRepos = services.GetService<IRepository<Customer>>();
+                var customerRepos = services.GetService<IRepository<SharedModels.Customer>>();
                 return customerRepos.Get(id);
             }
         }

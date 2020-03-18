@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace OrderApi.Infrastructure
 {
-    interface IServiceGateway<T>
+    public interface IServiceGateway<T>
     {
         T Get(int ID);
     }

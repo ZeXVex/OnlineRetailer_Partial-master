@@ -1,9 +1,6 @@
-﻿using CustomerApi.Models;
-using RestSharp;
+﻿using RestSharp;
+using SharedModels;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace OrderApi.Infrastructure
 {

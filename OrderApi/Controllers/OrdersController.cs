@@ -9,7 +9,7 @@ using OrderApi.Data;
 using OrderApi.Infrastructure;
 using OrderApi.Models;
 using RestSharp;
-using SharedProject;
+using SharedModels;
 
 namespace OrderApi.Controllers
 {
@@ -58,10 +58,10 @@ namespace OrderApi.Controllers
         [Route("getByProductId/{productId}")]
         public IActionResult GetProductById(int productId)
         {
-            var ord = new SharedProject.Order();
-            var orderline = new SharedProject.Order.OrderLine { ProductId = 1, OrderId = 1, ID = 1, Quantity = 1 };
+            var ord = new SharedModels.Order();
+            var orderline = new SharedModels.Order.OrderLine { ProductId = 1, OrderId = 1, ID = 1, Quantity = 1 };
 
-            ord.OrderLines = new SharedProject.Order.OrderLine[] { orderline };
+            ord.OrderLines = new SharedModels.Order.OrderLine[] { orderline };
             if (ProductItemsAvailable(ord))
             {
                 return StatusCode(200, "Connection worked");
@@ -97,7 +97,7 @@ namespace OrderApi.Controllers
 
         [HttpPost]
         [Route("GetThroughBus")]
-        public IActionResult Post([FromBody]SharedProject.Order order)
+        public IActionResult Post([FromBody]SharedModels.Order order)
         {
             if (order == null)
             {
@@ -114,7 +114,7 @@ namespace OrderApi.Controllers
                       order.customerId, order.OrderLines, "completed");
 
                     // Create order.
-                    order.Status = SharedProject.Order.OrderStatus.completed;
+                    order.Status = SharedModels.Order.OrderStatus.completed;
                     //var newOrder = repository.Add(order);
                     return CreatedAtRoute("GetOrder", new { id = order.Id }, order);
                 }
@@ -186,7 +186,7 @@ namespace OrderApi.Controllers
             }
         }
 
-        private bool ProductItemsAvailable(SharedProject.Order order)
+        private bool ProductItemsAvailable(SharedModels.Order order)
         {
             foreach (var orderLine in order.OrderLines)
             {

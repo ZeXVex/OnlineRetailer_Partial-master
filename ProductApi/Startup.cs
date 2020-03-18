@@ -12,6 +12,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using ProductApi.Data;
+using ProductApi.Infrastructure;
 using ProductApi.Models;
 
 namespace ProductApi
@@ -23,6 +24,8 @@ namespace ProductApi
             Configuration = configuration;
         }
 
+        string cloudAMQPConnectionString =
+            "host=hawk.rmq.cloudamqp.com;virtualHost=wdedqsoj;username=wdedqsoj;password= GV_TgSrC8n8fiBHEC_VfZ_GoOd-t0I3J";
         public IConfiguration Configuration { get; }
 
         // This method gets called by the runtime. Use this method to add services to the container.
@@ -53,21 +56,22 @@ namespace ProductApi
                 dbInitializer.Initialize(dbContext);
             }
 
+            //Create messagelistener in different thread
+            Task.Factory.StartNew(() =>
+                new ListenToMessages(app.ApplicationServices, cloudAMQPConnectionString).Start());
+
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
             }
+            else
+            {
+                // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
+                app.UseHsts();
+            }
 
             app.UseHttpsRedirection();
-
-            app.UseRouting();
-
-            app.UseAuthorization();
-
-            app.UseEndpoints(endpoints =>
-            {
-                endpoints.MapControllers();
-            });
+            app.UseMvc();
         }
     }
 }

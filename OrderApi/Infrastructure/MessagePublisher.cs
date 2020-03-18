@@ -1,10 +1,7 @@
-﻿using CustomerApi.Models;
-using EasyNetQ;
-using SharedProject;
+﻿using EasyNetQ;
+using SharedModels;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace OrderApi.Infrastructure
 {
@@ -20,8 +17,7 @@ namespace OrderApi.Infrastructure
         {
             bus.Dispose();
         }
-
-        public void PublishOrderStatusChangedMessage(int? customerId, IEnumerable<Order.OrderLine> orderLines, string topic)
+        void IMessagePublisher.PublishOrderStatusChangedMessage(int? customerId, IEnumerable<Order.OrderLine> orderLines, string topic)
         {
             var message = new OrderStatusChangedMessage
             {
@@ -31,11 +27,10 @@ namespace OrderApi.Infrastructure
 
             bus.Publish(message, topic);
         }
-
-        public Customer RequestCustomer(int id)
+        Customer IMessagePublisher.RequestCustomer(int id)
         {
-            var cr = CustomerRequest { id = id };
-            var response = bus.Request<CustomerRequest, Customer>(cq);
+            var cr = new CustomerRequest { ID = id };
+            var response = bus.Request<CustomerRequest, SharedModels.Customer>(cr);
             return response;
         }
     }

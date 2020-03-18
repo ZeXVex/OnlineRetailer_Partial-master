@@ -1,5 +1,5 @@
 ﻿using RestSharp;
-using SharedProject;
+using SharedModels;
 using System;
 
 namespace OrderApi.Infrastructure

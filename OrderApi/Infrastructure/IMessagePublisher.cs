@@ -1,5 +1,5 @@
 ﻿using System.Collections.Generic;
-using SharedProject;
+using SharedModels;
 
 namespace OrderApi.Infrastructure
 {

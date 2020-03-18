@@ -8,5 +8,6 @@ namespace CustomerApi.Data
     public interface IDbInitializer
     {
         void Initializer(CustomerApiContext context);
+        void Initialize(CustomerApiContext dbContext);
     }
 }

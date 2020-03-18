@@ -41,6 +41,12 @@ namespace OrderApi.Data
             return db.Orders.ToList();
         }
 
+        IEnumerable<Order> IRepository<Order>.GetAllByCustomer(int customerId)
+        {
+            IEnumerable<Order> orders = db.Orders.Where(o => o.Id == customerId);
+            return orders;
+        }
+
         void IRepository<Order>.Remove(int id)
         {
             var order = db.Orders.FirstOrDefault(p => p.Id == id);
