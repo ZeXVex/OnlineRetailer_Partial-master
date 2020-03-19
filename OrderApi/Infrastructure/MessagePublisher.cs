@@ -8,7 +8,6 @@ namespace OrderApi.Infrastructure
     public class MessagePublisher : IMessagePublisher, IDisposable
     {
         IBus bus;
-
         public MessagePublisher(string connectionString)
         {
             bus = RabbitHutch.CreateBus(connectionString);

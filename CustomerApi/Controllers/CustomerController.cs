@@ -10,12 +10,12 @@ namespace CustomerApi.Controllers
     public class CustomersController : ControllerBase
     {
         private readonly IRepository<Customer> repository;
-
         public CustomersController(IRepository<Customer> repos)
         {
             repository = repos;
         }
 
+        //Get all Customer
         [HttpGet]
         public IEnumerable<Customer> Get()
         {

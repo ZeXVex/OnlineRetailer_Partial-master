@@ -9,12 +9,10 @@ namespace OrderApi.Data
     public class OrderRepository : IRepository<Order>
     {
         private readonly OrderApiContext db;
-
         public OrderRepository(OrderApiContext context)
         {
             db = context;
         }
-
         Order IRepository<Order>.Add(Order entity)
         {
             if (entity.Date == null)
@@ -24,29 +22,24 @@ namespace OrderApi.Data
             db.SaveChanges();
             return newOrder;
         }
-
         void IRepository<Order>.Edit(Order entity)
         {
             db.Entry(entity).State = EntityState.Modified;
             db.SaveChanges();
         }
-
         Order IRepository<Order>.Get(int id)
         {
             return db.Orders.FirstOrDefault(o => o.Id == id);
         }
-
         IEnumerable<Order> IRepository<Order>.GetAll()
         {
             return db.Orders.ToList();
         }
-
         IEnumerable<Order> IRepository<Order>.GetAllByCustomer(int customerId)
         {
             IEnumerable<Order> orders = db.Orders.Where(o => o.Id == customerId);
             return orders;
         }
-
         void IRepository<Order>.Remove(int id)
         {
             var order = db.Orders.FirstOrDefault(p => p.Id == id);

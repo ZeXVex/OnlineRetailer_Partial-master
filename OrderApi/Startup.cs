@@ -18,11 +18,6 @@ namespace OrderApi
         {
             Configuration = configuration;
         }
-
-        // Base URL for the product service when the solution is executed using docker-compose.
-        // The product service (running as a container) listens on this URL for HTTP requests
-        // from other services specified in the docker compose file (which in this solution is
-        // the order service).
         private Uri productServiceBaseUrl = new Uri("http://productapi/api/products/");
 
         // RabbitMQ connection string (I use CloudAMQP as a RabbitMQ server).

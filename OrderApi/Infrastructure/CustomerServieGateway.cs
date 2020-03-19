@@ -7,7 +7,6 @@ namespace OrderApi.Infrastructure
     public class CustomerServieGateway : IServiceGateway<Customer>
     {
         Uri customerServiceBaseUrl;
-
         public CustomerServieGateway(Uri baseUrl)
         {
             customerServiceBaseUrl = baseUrl;

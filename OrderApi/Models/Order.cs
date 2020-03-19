@@ -12,7 +12,6 @@ namespace OrderApi.Models
             Shipped = 3,
             Paid = 4
         };
-
         public int Id { get; set; }
         public DateTime? Date { get; set; }
         public List<ProductDTO> Products { get; set; }

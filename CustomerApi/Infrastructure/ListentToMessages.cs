@@ -19,7 +19,6 @@ namespace CustomerApi.Infrastructure
             this.provider = provider;
             this.connectionString = connectionString;
         }
-
         public void Start()
         {
             using (var bus = RabbitHutch.CreateBus(connectionString))

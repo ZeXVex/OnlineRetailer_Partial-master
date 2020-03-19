@@ -17,9 +17,8 @@ namespace OrderApi.Controllers
     public class OrdersController : Controller
     {
         private readonly IRepository<Models.Order> repository;
-        IServiceGateway<Product> productServiceGateway;
-        IMessagePublisher messagePublisher;
-
+        readonly IServiceGateway<Product> productServiceGateway;
+        readonly IMessagePublisher messagePublisher;
         public OrdersController(IRepository<Models.Order> repoes, IServiceGateway<Product> gateway, IMessagePublisher publisher)
         {
             repository = repoes;
@@ -120,13 +119,13 @@ namespace OrderApi.Controllers
                 }
                 catch
                 {
-                    return StatusCode(500, "An error happened. Try again.");
+                    return StatusCode(500, "Please try again an error occured.");
                 }
             }
             else
             {
                 // If there are not enough product items available.
-                return StatusCode(500, "Not enough items in stock.");
+                return StatusCode(500, "Item is out of stock.");
             }
         }
 

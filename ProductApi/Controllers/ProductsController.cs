@@ -10,7 +10,6 @@ namespace ProductApi.Controllers
     public class ProductsController : ControllerBase
     {
         private readonly IRepository<Product> repository;
-
         public ProductsController(IRepository<Product> repos)
         {
             repository = repos;

@@ -1,3 +1,4 @@
+using System;
 using System.Threading.Tasks;
 using CustomerApi.Data;
 using CustomerApi.Infrastructure;
@@ -14,10 +15,7 @@ namespace CustomerApi
 {
     public class Startup
     {
-        // This method gets called by the runtime. Use this method to add services to the container.
-        // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
-
-        //https://localhost:44396/api/product
+        //https://localhost:44396/product
         //https://localhost:44393/api/orders
         //https://localhost:44380/Customers
         public Startup(IConfiguration configuration)
@@ -28,7 +26,6 @@ namespace CustomerApi
 
         string cloudAMQPConnectionString =
             "host=hawk.rmq.cloudamqp.com;virtualHost=wdedqsoj;username=wdedqsoj;password=GV_TgSrC8n8fiBHEC_VfZ_GoOd-t0I3J";
-
         public void ConfigureServices(IServiceCollection services)
         {
             // In-memory database:
