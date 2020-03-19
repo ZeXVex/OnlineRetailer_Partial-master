@@ -16,6 +16,10 @@ namespace CustomerApi
     {
         // This method gets called by the runtime. Use this method to add services to the container.
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
+
+        //https://localhost:44396/api/product
+        //https://localhost:44393/api/orders
+        //https://localhost:44380/Customers
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
@@ -49,7 +53,7 @@ namespace CustomerApi
                 var services = scope.ServiceProvider;
                 var dbContext = services.GetService<CustomerApiContext>();
                 var dbInitializer = services.GetService<IDbInitializer>();
-                dbInitializer.Initialize(dbContext);
+                dbInitializer.Initializer(dbContext);
             }
 
             // Create a message listener in a separate thread.

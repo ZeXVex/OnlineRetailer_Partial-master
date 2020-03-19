@@ -14,6 +14,5 @@ namespace CustomerApi.Models
         public string BillingAddress { get; set; }
         public string ShippingAddress { get; set; }
         public Boolean creditStanding { get; set; }
-        public int OrderID { get; set; }
     }
 }

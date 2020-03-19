@@ -23,7 +23,7 @@ namespace CustomerApi.Controllers
         }
 
         // GET Customer/1
-        [HttpGet("{id}", Name = "GetCustomer")]
+        [Route("GetCustomer/{id}")]
         public IActionResult Get(int id)
         {
             var item = repository.Get(id);

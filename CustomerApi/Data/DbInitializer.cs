@@ -8,11 +8,6 @@ namespace CustomerApi.Data
 {
     public class DbInitializer : IDbInitializer
     {
-        void IDbInitializer.Initialize(CustomerApiContext dbContext)
-        {
-            
-        }
-
         void IDbInitializer.Initializer(CustomerApiContext context)
         {
             context.Database.EnsureDeleted();
